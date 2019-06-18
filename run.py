@@ -13,18 +13,30 @@ parser.add_argument("-o", "--oname", required=False,
                     default=None, type=str, dest='oname')
 parser.add_argument("--thresh", required=False,
                     default=4.0, type=float, dest='thresh')
+parser.add_argument("--count", required=False,
+                    default=40, type=int, dest='count')                    
 parser.add_argument("-n", "--ngram", required=False,
-                    default=4, type=int, dest='ngram')
+                    default=8, type=int, dest='ngram')
 parser.add_argument("--save", required=False,
                     default=False, type=bool, dest='save')
-
+parser.add_argument("--preprocess", required=False,
+                    default=False, type=bool, dest='preprocess')
 
 if __name__ == '__main__':
     tic = time()
     args = parser.parse_args()
     rfpath = join(RFDIR, args.fname)
-    extracter = Extractor(rfpath=rfpath, max_len=args.ngram)
-    words = extracter.extract_words(thresh=args.thresh)
+    print(args.preprocess, args.count)
+    if not args.preprocess:
+        try:
+            text = open(rfpath, "r").readlines()
+        except:
+            text = open(rfpath, "r", encoding="utf-8").readlines()
+        text = [line.strip() for line in text]
+        extracter = Extractor(text=text, max_len=args.ngram)
+    else:
+        extracter = Extractor(rfpath=rfpath, max_len=args.ngram)
+    words = extracter.extract_words(score_thresh=args.thresh, cnt_thresh=args.count)
     if args.save:
         if args.oname:
             opath = join(WFDIR, args.oname)
